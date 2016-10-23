@@ -13,7 +13,7 @@ type ExpungeCommand struct {
 
 func (cmd *ExpungeCommand) Command() *imap.Command {
 	return &imap.Command{
-		Name: imap.Expunge,
+		Name:      imap.Expunge,
 		Arguments: []interface{}{cmd.SeqSet},
 	}
 }
