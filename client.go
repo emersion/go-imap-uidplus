@@ -21,7 +21,7 @@ func NewClient(c *client.Client) *Client {
 
 // SupportsUidPlus checks if the server supports the UIDPLUS extension.
 func (c *Client) SupportsUidPlus() bool {
-	rteurn c.c.Caps[Capability]
+	return c.c.Caps[Capability]
 }
 
 // UidExpunge permanently removes all messages that both have the \Deleted flag
@@ -51,9 +51,10 @@ func (c *Client) UidExpunge(seqSet *imap.SeqSet, ch chan uint32) error {
 	return status.Err()
 }
 
-// Same as Client.Append, but can also return the UID of the appended message
-// and the UID validity of the destination mailbox. The server can choose not
-// to return these values, in this case uid and validity will be equal to zero.
+// Append is the same as Client.Append, but can also return the UID of the
+// appended message and the UID validity of the destination mailbox. The server
+// can choose not to return these values, in this case uid and validity will be
+// equal to zero.
 func (c *Client) Append(mbox string, flags []string, date time.Time, msg imap.Literal) (validity, uid uint32, err error) {
 	if c.c.State & imap.AuthenticatedState == 0 {
 		err = client.ErrNotLoggedIn
@@ -80,4 +81,51 @@ func (c *Client) Append(mbox string, flags []string, date time.Time, msg imap.Li
 		uid, _ = imap.ParseNumber(status.Arguments[1])
 	}
 	return
+}
+
+func (c *Client) copy(uid bool, seqSet *imap.SeqSet, dest string) (validity uint32, srcUids, dstUids *imap.SeqSet, err error) {
+	if c.c.State & imap.SelectedState == 0 {
+		err = client.ErrNoMailboxSelected
+		return
+	}
+
+	var cmd imap.Commander
+	cmd = &commands.Copy{
+		SeqSet:  seqSet,
+		Mailbox: dest,
+	}
+	if uid {
+		cmd = &commands.Uid{Cmd: cmd}
+	}
+
+	status, err := c.c.Execute(cmd, nil)
+	if err != nil {
+		return
+	}
+	if err = status.Err(); err != nil {
+		return
+	}
+
+	if status.Code == CodeCopyUid && len(status.Arguments) >= 3 {
+		validity, _ = imap.ParseNumber(status.Arguments[0])
+		if seqSet, ok := status.Arguments[1].(string); ok {
+			srcUids, _ = imap.NewSeqSet(seqSet)
+		}
+		if seqSet, ok := status.Arguments[2].(string); ok {
+			dstUids, _ = imap.NewSeqSet(seqSet)
+		}
+	}
+	return
+}
+
+// Copy is the same as Client.Copy, but can also return the source and
+// destination UIDs of the copied messages.
+func (c *Client) Copy(seqset *imap.SeqSet, dest string) (validity uint32, srcUids, dstUids *imap.SeqSet, err error) {
+	return c.copy(false, seqset, dest)
+}
+
+// UidCopy is the same as Client.UidCopy, but can also return the source and
+// destination UIDs of the copied messages.
+func (c *Client) UidCopy(seqset *imap.SeqSet, dest string) (validity uint32, srcUids, dstUids *imap.SeqSet, err error) {
+	return c.copy(true, seqset, dest)
 }
