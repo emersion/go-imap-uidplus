@@ -1,6 +1,8 @@
 package uidplus
 
 import (
+	"time"
+
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-imap/commands"
@@ -42,4 +44,35 @@ func (c *Client) UidExpunge(seqSet *imap.SeqSet, ch chan uint32) error {
 	}
 
 	return status.Err()
+}
+
+// Same as Client.Append, but can also return the UID of the appended message
+// and the UID validity of the destination mailbox. The server can choose not
+// to return these values, in this case uid and validity will be equal to zero.
+func (c *Client) Append(mbox string, flags []string, date time.Time, msg imap.Literal) (validity, uid uint32, err error) {
+	if c.c.State & imap.AuthenticatedState == 0 {
+		err = client.ErrNotLoggedIn
+		return
+	}
+
+	cmd := &commands.Append{
+		Mailbox: mbox,
+		Flags:   flags,
+		Date:    date,
+		Message: msg,
+	}
+
+	status, err := c.c.Execute(cmd, nil)
+	if err != nil {
+		return
+	}
+	if err = status.Err(); err != nil {
+		return
+	}
+
+	if status.Code == CodeAppendUid && len(status.Arguments) >= 2 {
+		validity, _ = imap.ParseNumber(status.Arguments[0])
+		uid, _ = imap.ParseNumber(status.Arguments[1])
+	}
+	return
 }

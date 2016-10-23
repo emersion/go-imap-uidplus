@@ -6,7 +6,7 @@ import (
 	"github.com/emersion/go-imap"
 )
 
-// An UID EXPUNGE command, as defined in RFC
+// An UID EXPUNGE command, as defined in RFC 4315 section 2.1.
 type ExpungeCommand struct {
 	SeqSet *imap.SeqSet
 }
