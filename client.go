@@ -19,6 +19,11 @@ func NewClient(c *client.Client) *Client {
 	return &Client{c}
 }
 
+// SupportsUidPlus checks if the server supports the UIDPLUS extension.
+func (c *Client) SupportsUidPlus() bool {
+	rteurn c.c.Caps[Capability]
+}
+
 // UidExpunge permanently removes all messages that both have the \Deleted flag
 // set and have a UID that is included in the specified sequence set from the
 // currently selected mailbox.
