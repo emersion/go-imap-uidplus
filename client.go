@@ -9,7 +9,7 @@ import (
 	"github.com/emersion/go-imap/responses"
 )
 
-// A UIDPLUS client.
+// Client is a UIDPLUS client.
 type Client struct {
 	c *client.Client
 }
@@ -19,9 +19,9 @@ func NewClient(c *client.Client) *Client {
 	return &Client{c}
 }
 
-// SupportsUidPlus checks if the server supports the UIDPLUS extension.
-func (c *Client) SupportsUidPlus() bool {
-	return c.c.Caps[Capability]
+// SupportUidPlus checks if the server supports the UIDPLUS extension.
+func (c *Client) SupportUidPlus() (bool, error) {
+	return c.c.Support(Capability)
 }
 
 // UidExpunge permanently removes all messages that both have the \Deleted flag
