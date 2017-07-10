@@ -109,10 +109,10 @@ func (c *Client) copy(uid bool, seqSet *imap.SeqSet, dest string) (validity uint
 	if status.Code == CodeCopyUid && len(status.Arguments) >= 3 {
 		validity, _ = imap.ParseNumber(status.Arguments[0])
 		if seqSet, ok := status.Arguments[1].(string); ok {
-			srcUids, _ = imap.NewSeqSet(seqSet)
+			srcUids, _ = imap.ParseSeqSet(seqSet)
 		}
 		if seqSet, ok := status.Arguments[2].(string); ok {
-			dstUids, _ = imap.NewSeqSet(seqSet)
+			dstUids, _ = imap.ParseSeqSet(seqSet)
 		}
 	}
 	return
