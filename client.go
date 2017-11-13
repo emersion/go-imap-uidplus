@@ -30,7 +30,7 @@ func (c *Client) SupportUidPlus() (bool, error) {
 func (c *Client) UidExpunge(seqSet *imap.SeqSet, ch chan uint32) error {
 	defer close(ch)
 
-	if c.c.State != imap.SelectedState {
+	if c.c.State() != imap.SelectedState {
 		return client.ErrNoMailboxSelected
 	}
 
@@ -56,7 +56,7 @@ func (c *Client) UidExpunge(seqSet *imap.SeqSet, ch chan uint32) error {
 // can choose not to return these values, in this case uid and validity will be
 // equal to zero.
 func (c *Client) Append(mbox string, flags []string, date time.Time, msg imap.Literal) (validity, uid uint32, err error) {
-	if c.c.State&imap.AuthenticatedState == 0 {
+	if c.c.State()&imap.AuthenticatedState == 0 {
 		err = client.ErrNotLoggedIn
 		return
 	}
@@ -84,7 +84,7 @@ func (c *Client) Append(mbox string, flags []string, date time.Time, msg imap.Li
 }
 
 func (c *Client) copy(uid bool, seqSet *imap.SeqSet, dest string) (validity uint32, srcUids, dstUids *imap.SeqSet, err error) {
-	if c.c.State&imap.SelectedState == 0 {
+	if c.c.State()&imap.SelectedState == 0 {
 		err = client.ErrNoMailboxSelected
 		return
 	}
