@@ -129,3 +129,6 @@ func (c *Client) Copy(seqset *imap.SeqSet, dest string) (validity uint32, srcUid
 func (c *Client) UidCopy(seqset *imap.SeqSet, dest string) (validity uint32, srcUids, dstUids *imap.SeqSet, err error) {
 	return c.copy(true, seqset, dest)
 }
+
+// UidPlusClient is an alias used to compose multiple client extensions.
+type UidPlusClient = Client
