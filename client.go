@@ -38,7 +38,7 @@ func (c *Client) UidExpunge(seqSet *imap.SeqSet, ch chan uint32) error {
 		Cmd: &ExpungeCommand{SeqSet: seqSet},
 	}
 
-	var res *responses.Expunge
+	var res responses.Handler
 	if ch != nil {
 		res = &responses.Expunge{SeqNums: ch}
 	}
