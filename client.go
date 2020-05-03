@@ -28,7 +28,9 @@ func (c *Client) SupportUidPlus() (bool, error) {
 // set and have a UID that is included in the specified sequence set from the
 // currently selected mailbox.
 func (c *Client) UidExpunge(seqSet *imap.SeqSet, ch chan uint32) error {
-	defer close(ch)
+	if ch != nil {
+		defer close(ch)
+	}
 
 	if c.c.State() != imap.SelectedState {
 		return client.ErrNoMailboxSelected
